@@ -1,3 +1,4 @@
+import { t, useLocale } from '../../../../i18n/locale';
 import React from 'react';
 import { TextField, TextFieldProps as MuiTextFieldProps } from '@mui/material';
 
@@ -9,9 +10,10 @@ type InputTypes = {
   value?: string;
   error?: string | null;
   autoFocus?: boolean;
-} & MuiTextFieldProps;
+} & Omit<MuiTextFieldProps, 'error'>;
 
 const InputField: React.FC<InputTypes> = ({ label, type = 'text', name, value, onChange, error = null, ...rest }) => {
+  useLocale();
   return (
     <TextField
       variant='outlined'
@@ -21,7 +23,7 @@ const InputField: React.FC<InputTypes> = ({ label, type = 'text', name, value, o
       onChange={onChange}
       type={type}
       {...rest}
-      {...(error && { error: true, helperText: error })}
+      {...(error ? { error: true, helperText: t(error) } : {})}
     />
   );
 };

@@ -1,7 +1,8 @@
-import { ArrowRight } from '@mui/icons-material';
+import { t, useLocale } from "../../../../i18n/locale";
+import ArrowRight from '@mui/icons-material/ArrowRight';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { Form, useForm, useModal } from '../../../../hooks';
 import { getSearchQueryData } from '../../../../services/sessionStorage.service';
 import { createBooking, getBookingCreatedStatus, getBookingsErrors } from '../../../../store/bookings';
@@ -15,20 +16,25 @@ import GuestsCounter from '../../GuestsCounter';
 import { SuccessBookingModal } from '../../modals';
 import BookingFormPriceInfo from './BookingFormPriceInfo';
 import validatorConfig from './validatorConfig';
-
-const oneDayMs = 86_000_000;
-
+const oneDayMs = 86_400_000;
 const BookingForm = () => {
+  useLocale();
   const searchQueryData = getSearchQueryData();
-
   const [totalPrice, setTotalPrice] = useState(0);
   const dispatch = useAppDispatch();
-  const { roomId } = useParams<{ roomId: string }>();
+  const {
+    roomId = ''
+  } = useParams<{
+    roomId: string;
+  }>();
   const currentUserId = useSelector(getCurrentUserId());
   const bookingCreateStatusLoading = useSelector(getBookingCreatedStatus());
   const bookingError = useSelector(getBookingsErrors());
-  const { isOpen, handleOpenModal, handleCloseModal } = useModal();
-
+  const {
+    isOpen,
+    handleOpenModal,
+    handleCloseModal
+  } = useModal();
   const initialData = {
     arrivalDate: searchQueryData.arrivalDate || Date.now(),
     departureDate: searchQueryData.departureDate || Date.now() + oneDayMs,
@@ -37,13 +43,19 @@ const BookingForm = () => {
     babies: searchQueryData.babies || 0,
     userId: currentUserId || 'not found',
     roomId: roomId,
-    totalPrice: 0,
+    totalPrice: 0
   };
-  const { data, errors, enterError, setEnterError, handleInputChange, handleResetForm, handleKeyDown, validate } =
-    useForm(initialData, false, validatorConfig);
-
+  const {
+    data,
+    errors,
+    enterError,
+    setEnterError,
+    handleInputChange,
+    handleResetForm,
+    handleKeyDown,
+    validate
+  } = useForm(initialData, false, validatorConfig);
   const countDays = Math.max(1, Math.round((data.departureDate - data.arrivalDate) / oneDayMs));
-
   useEffect(() => {
     if (!currentUserId) {
       setEnterError('Увійдіть, щоб забронювати номер');
@@ -55,21 +67,20 @@ const BookingForm = () => {
       if (bookingError === 'На сервері сталася помилка. Спробуйте пізніше') {
         setEnterError('Упс, щось пішло не так, спробуйте пізніше');
       }
+      if (bookingError !== 'BOOKING_EXIST') setEnterError('Перевірте дати та кількість гостей. Якщо номер зайнятий, оберіть інші дати.');
     }
   }, [currentUserId, bookingError]);
-
   const handleSubmit = (event: React.FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (validate(data)) {
       const payload = {
         ...data,
-        totalPrice,
+        totalPrice
       };
       try {
         dispatch(createBooking(payload)).then((bookingData: BookingType) => {
           if (bookingData) {
-            dispatch(addBookingRoom(bookingData)).then(() => handleOpenModal());
-            handleResetForm(event);
+            handleOpenModal();
           }
         });
       } catch (error) {
@@ -77,38 +88,15 @@ const BookingForm = () => {
       }
     }
   };
-
-  return (
-    <>
+  return <>
       <Form data={data} errors={errors} handleChange={handleInputChange} handleKeyDown={handleKeyDown}>
         <DateOfStayField onChange={handleInputChange} data={data} />
         <GuestsCounter onChange={handleInputChange} data={data} />
-        <BookingFormPriceInfo
-          roomId={roomId}
-          totalPrice={totalPrice}
-          countDays={countDays}
-          setTotalPrice={setTotalPrice}
-        />
-        <Button
-          endIcon={<ArrowRight />}
-          type='submit'
-          className='form-btn__submit mt-0'
-          onClick={handleSubmit}
-          disabled={Object.keys(errors).length > 0 || !!enterError}
-          fullWidth
-        >
-          Забронювати
-        </Button>
+        <BookingFormPriceInfo roomId={roomId} totalPrice={totalPrice} countDays={countDays} setTotalPrice={setTotalPrice} />
+        <Button endIcon={<ArrowRight />} type='submit' className='form-btn__submit mt-0' onClick={handleSubmit} disabled={Object.keys(errors).length > 0 || !currentUserId || bookingCreateStatusLoading} fullWidth>{t("Забронювати")}</Button>
       </Form>
-      {enterError && <p className='form__enter-error'>{enterError}</p>}
-      <SuccessBookingModal
-        open={isOpen}
-        onClose={handleCloseModal}
-        isLoading={bookingCreateStatusLoading}
-        bookingData={data}
-      />
-    </>
-  );
+      {enterError && <p className='form__enter-error'>{t(enterError)}</p>}
+      <SuccessBookingModal open={isOpen} onClose={handleCloseModal} isLoading={bookingCreateStatusLoading} bookingData={data} />
+    </>;
 };
-
 export default BookingForm;

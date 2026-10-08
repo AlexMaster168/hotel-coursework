@@ -1,3 +1,4 @@
+import { t, useLocale } from '../../../../i18n/locale';
 import React from 'react';
 import {
   FormControl,
@@ -8,10 +9,10 @@ import {
   SelectProps as MuiSelectProps,
 } from '@mui/material';
 
-type SelectFieldType = MuiSelectProps & {
+type SelectFieldType = Omit<MuiSelectProps, 'error' | 'onChange'> & {
   label?: string;
   value?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: any) => void;
   defaultValue?: string;
   error?: string;
   name: string;
@@ -42,25 +43,26 @@ const SelectField: React.FC<SelectFieldType> = ({
   error,
   ...rest
 }) => {
+  useLocale();
   const optionsArray = options.map(option => ({
     name: option.name,
     value: typeof option.value === 'object' ? JSON.stringify(option.value) : option.value,
   }));
 
   return (
-    <FormControl variant='outlined' {...(error && { error: true })}>
-      <InputLabel>{label}</InputLabel>
+    <FormControl variant='outlined' {...(error ? { error: true } : {})}>
+      <InputLabel>{label ? t(label) : label}</InputLabel>
       <MuiSelect label={label} name={name} value={value} onChange={onChange} {...rest}>
         <MenuItem value='' disabled>
-          {defaultValue || label}
+          {t(defaultValue || label || "")}
         </MenuItem>
         {optionsArray.map(item => (
           <MenuItem key={item.value} value={item.value}>
-            {item.name}
+            {t(item.name)}
           </MenuItem>
         ))}
       </MuiSelect>
-      {error && <FormHelperText>{error}</FormHelperText>}
+      {error && <FormHelperText>{t(error)}</FormHelperText>}
     </FormControl>
   );
 };

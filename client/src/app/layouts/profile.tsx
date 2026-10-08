@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router-dom';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import Container from '../components/common/Container';
 import Footer from '../components/common/Footer/Footer';
@@ -17,7 +17,7 @@ const Profile: React.FC = () => {
       <Header />
       <Container>
         <Breadcrumbs />
-        {userId ? <ProfilePage /> : <Redirect to={`profile/${currentUserId}`} />}
+        {userId ? <ProfilePage /> : <Navigate replace to={`/profile/${currentUserId}`} />}
       </Container>
       <Footer />
     </>

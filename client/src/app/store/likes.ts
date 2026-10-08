@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit';
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import likesService from '../services/likes.service';
 import { LikeType } from './../types/types';
@@ -56,19 +57,9 @@ export const loadLikesList = (): AppThunk => async (dispatch, getState) => {
 export const getLikes = () => (state: RootState) => state.likes.entities;
 export const getLikesLoadingStatus = () => (state: RootState) => state.likes.isLoading;
 
-export const getLikesByReviewId = (reviewId: string) => (state: RootState) => {
-  if (state.likes.entities) {
-    return state.likes.entities.filter(like => like.reviewId === reviewId);
-  }
-  return [];
-};
+export const getLikesByReviewId = (reviewId: string) => createSelector([(state:RootState)=>state.likes.entities], entities=>entities.filter(item=>item.reviewId===reviewId));
 
-export const getLikesByUserId = (userId: string) => (state: RootState) => {
-  if (state.likes.entities) {
-    return state.likes.entities.filter(like => like.userId === userId);
-  }
-  return [];
-};
+export const getLikesByUserId = (userId: string) => createSelector([(state:RootState)=>state.likes.entities], entities=>entities.filter(item=>item.userId===userId));
 
 export const createLike =
   (payload: { userId: string; reviewId: string }): AppThunk =>

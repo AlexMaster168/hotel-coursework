@@ -1,86 +1,19 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import { t, getLanguage } from '../i18n/locale';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
-import configFile from '../config.json';
 import authService from './auth.service';
-import localStorageService from './localStorage.service';
-
-const http = axios.create({
-  baseURL: configFile.apiEndPoint,
+import storage from './localStorage.service';
+const http=axios.create({baseURL:import.meta.env.VITE_API_URL||'/api',timeout:15000});
+let refresh:Promise<void>|null=null;
+http.interceptors.request.use(async(config:InternalAxiosRequestConfig)=>{
+ if(storage.getRefreshToken()&&Number(storage.getTokenExpiresDate())<Date.now()){
+  refresh ||= authService.refresh().then(storage.setTokens).catch(error=>{storage.removeAuthData();window.dispatchEvent(new Event('session-expired'));throw error;}).finally(()=>{refresh=null;});
+  await refresh;
+ }
+ config.headers.set('Accept-Language',getLanguage());const token=storage.getAccessToken();if(token)config.headers.set('Authorization',`Bearer ${token}`);return config;
 });
-
-http.interceptors.request.use(
-  async function (config: AxiosRequestConfig): Promise<AxiosRequestConfig> {
-    const expiresDate = localStorageService.getTokenExpiresDate();
-    const refreshToken = localStorageService.getRefreshToken();
-
-    const isExpired = refreshToken && Number(expiresDate) < Date.now();
-
-    if (configFile.isFireBase) {
-      const containSlash = /\/$/gi.test(String(config.url));
-      config.url = (containSlash ? config.url?.slice(0, -1) : config.url) + '.json';
-
-      if (isExpired) {
-        const data = await authService.refresh();
-        localStorageService.setTokens({
-          expiresIn: data.expires_in,
-          accessToken: data.id_token,
-          userId: data.user_id,
-          refreshToken: data.refresh_token,
-        });
-      }
-      const accessToken = localStorageService.getAccessToken();
-      if (accessToken) {
-        config.params = { ...config.params, auth: accessToken };
-      }
-    } else {
-      if (isExpired) {
-        const data = await authService.refresh();
-        localStorageService.setTokens(data);
-      }
-      const accessToken = localStorageService.getAccessToken();
-      if (accessToken) {
-        config.headers = { ...config.headers, Authorization: `Bearer ${accessToken}` };
-      }
-    }
-    return config;
-  },
-  function (error) {
-    return Promise.reject(error);
-  }
-);
-
-function transformData(data: any) {
-  return data && !data._id
-    ? Object.keys(data).map(key => ({
-        ...data[key],
-      }))
-    : data;
-}
-
-http.interceptors.response.use(
-  res => {
-    if (configFile.isFireBase) {
-      res.data = { content: transformData(res.data) };
-    }
-    res.data = { content: res.data };
-    return res;
-  },
-  function (error) {
-    const expectedErrors = error.response && error.response.status >= 400 && error.response.status < 500;
-    if (!expectedErrors) {
-      console.log(error);
-      toast.error('Something was wrong. Try it later');
-    }
-    return Promise.reject(error);
-  }
-);
-
-const httpService = {
-  get: http.get,
-  post: http.post,
-  put: http.put,
-  delete: http.delete,
-  patch: http.patch,
-};
-
-export default httpService;
+http.interceptors.response.use(res=>{res.data={content:res.data};return res;},error=>{
+ if(!error.response||error.response.status>=500)toast.error(t('Не вдалося виконати запит. Спробуйте пізніше.'));
+ return Promise.reject(error);
+});
+export default {get:http.get,post:http.post,put:http.put,delete:http.delete,patch:http.patch};

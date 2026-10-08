@@ -19,6 +19,8 @@ export type RoomType = {
 };
 
 export type BookingType = {
+  status?: 'confirmed' | 'cancelled';
+  paymentStatus?: 'unpaid' | 'paid' | 'refunded';
   _id?: string;
   adults: number;
   babies: number;

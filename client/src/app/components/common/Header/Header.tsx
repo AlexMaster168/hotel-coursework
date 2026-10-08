@@ -1,3 +1,4 @@
+import { t, useLocale } from "../../../i18n/locale";
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
@@ -9,38 +10,30 @@ import Container from '../Container';
 import Divider from '../Divider';
 import Logo from '../Logo';
 import NavList from '../NavList';
-
+import LanguageSwitch from '../LanguageSwitch';
 const Header: React.FC = () => {
+  useLocale();
   const isLoggedIn = useSelector(getIsLoggedIn());
   const authErrors = useSelector(getAuthErrors());
-
-  return (
-    <header className='header'>
+  return <header className='header'>
       <Container>
         <div className='header__inner'>
           <Logo className='header__logo' />
           <NavList routes={navigationRoutes} className='header-nav' />
-          {isLoggedIn && !authErrors ? (
-            <>
+          <LanguageSwitch />
+          {isLoggedIn && !authErrors ? <>
               <Divider orientation='vertical' flexItem className='header__divider' />
               <NavProfile />
-            </>
-          ) : (
-            <div className='header-buttons'>
+            </> : <div className='header-buttons'>
               <NavLink to='/login/signIn' className='header-buttons-button'>
-                <Button size='small' variant='outlined'>
-                  Увійти
-                </Button>
+                <Button size='small' variant='outlined'>{t("Увійти")}</Button>
               </NavLink>
               <NavLink to='/login/signUp' className='header-buttons-button'>
-                <Button size='small'>Зареєструватись</Button>
+                <Button size='small'>{t("Зареєструватись")}</Button>
               </NavLink>
-            </div>
-          )}
+            </div>}
         </div>
       </Container>
-    </header>
-  );
+    </header>;
 };
-
 export default React.memo(Header);

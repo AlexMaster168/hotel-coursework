@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const schema = new Schema({
   roomNumber: Number,
-  price: Number,
+  price: { type: Number, min: 1, required: true },
   countReviews: Number,
   rate: Number,
   images: [String],

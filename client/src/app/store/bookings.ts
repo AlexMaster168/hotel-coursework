@@ -1,8 +1,11 @@
+import { t } from '../i18n/locale';
+import { createSelector } from '@reduxjs/toolkit';
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import bookingService from '../services/booking.service';
 import isOutDated from '../utils/isOutDated';
 import { BookingType } from './../types/types';
 import { AppThunk, RootState } from './createStore';
+import { toast } from 'react-toastify';
 
 const bookingsSlice = createSlice({
   name: 'bookings',
@@ -44,6 +47,9 @@ const bookingsSlice = createSlice({
       state.error = null;
     },
   },
+  extraReducers: builder => {
+    builder.addCase('users/userLoggedOut', state => { state.entities = []; state.error = null; state.isLoading = false; });
+  },
 });
 
 const { actions, reducer: bookingsReducer } = bookingsSlice;
@@ -63,7 +69,7 @@ const removeBookingRequestedFailed = createAction('bookings/removeBookingRequest
 
 export const loadBookingsList = (): AppThunk => async (dispatch, getState) => {
   const { lastFetch } = getState().bookings;
-  if (isOutDated(Number(lastFetch))) {
+  {
     dispatch(bookingsRequested());
     try {
       const { content } = await bookingService.getAll();
@@ -83,12 +89,7 @@ export const createBooking =
       dispatch(bookingCreated(content));
       return content;
     } catch (error) {
-      if (error.response.status === 500) {
-        dispatch(bookingCreateRequestedFailed(error.response.data.message));
-        return;
-      }
-      const { message } = error.response.data.error;
-      dispatch(bookingCreateRequestedFailed(message));
+      dispatch(bookingCreateRequestedFailed(error.response?.data?.error?.message || 'Не вдалося забронювати. Спробуйте ще раз.'));
     }
   };
 
@@ -98,27 +99,18 @@ export const removeBooking =
     dispatch(removeBookingRequested());
     try {
       const id = await bookingService.remove(bookingId || '');
-      dispatch(bookingRemoved(id));
+      dispatch(loadBookingsList());
     } catch (error) {
       dispatch(removeBookingRequestedFailed());
+      toast.error(t(error.response?.data?.error?.message || 'Не вдалося скасувати бронювання.'));
     }
   };
 
 export const getBookings = () => (state: RootState) => state.bookings.entities;
 export const getBookingsLoadingStatus = () => (state: RootState) => state.bookings.isLoading;
 export const getBookingCreatedStatus = () => (state: RootState) => state.bookings.createBookingLoading;
-export const getBookingsByUserId = (userId: string) => (state: RootState) => {
-  if (state.bookings.entities) {
-    return state.bookings.entities.filter(booking => booking.userId === userId);
-  }
-  return [];
-};
-export const getBookingsByRoomId = (roomId: string) => (state: RootState) => {
-  if (state.bookings.entities) {
-    return state.bookings.entities.filter(booking => booking.roomId === roomId);
-  }
-  return [];
-};
+export const getBookingsByUserId = (userId: string) => createSelector([(state:RootState)=>state.bookings.entities], entities=>entities.filter(item=>item.userId===userId));
+export const getBookingsByRoomId = (roomId: string) => createSelector([(state:RootState)=>state.bookings.entities], entities=>entities.filter(item=>item.roomId===roomId && item.status !== 'cancelled'));
 
 export const getBookingsErrors = () => (state: RootState) => state.bookings.error;
 

@@ -1,6 +1,62 @@
-@import './variables';
-@import './components';
-@import './libs';
+@use './variables' as *;
+@use './components' as *;
+@use './libs' as *;
+
+.gallery { position: relative; overflow: hidden; }
+.gallery-slide, .gallery-slide > div { width: 100%; height: 100%; }
+.gallery-slide img { width: 100%; height: 100%; object-fit: cover; }
+.room-card__gallery { height: 190px; }
+.room-page__gallery { height: 440px; }
+.gallery-prev, .gallery-next { position: absolute; top: 45%; z-index: 3; border: 0; border-radius: 50%; background: #fff; padding: 6px; cursor: pointer; }
+.gallery-prev { left: 10px; } .gallery-next { right: 10px; }
+.gallery-count { position: absolute; bottom: 12px; right: 12px; padding: 4px 10px; background: #1f2041; color: #fff; border-radius: 20px; }
+.rooms-page__rooms { min-width: 0; }
+.rooms-page__filters { flex-shrink: 0; }
+.rooms-page__sorting { flex-wrap: wrap; }
+.filters-panel > summary { display: none; cursor: pointer; padding: 16px; border: 1px solid #ddd; border-radius: 8px; font-weight: 700; }
+.language-switch { display: flex; flex-shrink: 0; border: 1px solid #dedee8; border-radius: 24px; padding: 3px; margin: 0 18px; background: #f7f7fc; }
+.language-switch button { border: 0; border-radius: 20px; padding: 7px 10px; background: transparent; color: #53536c; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.language-switch button[aria-pressed='true'] { background: #1f2041; color: #fff; }
+.room-card__rentPerDay { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+.booking-form__cost { white-space: nowrap; }
+.booking-info__body td { overflow-wrap: anywhere; }
+:focus-visible { outline: 3px solid #8ba4f9; outline-offset: 3px; }
+
+@media (max-width: 900px) {
+  .filters-panel > summary { display: list-item; }
+  .filters__form { padding-right: 0; }
+  .header { height: auto; padding: 14px 0; }
+  .header__inner { flex-wrap: wrap; gap: 12px; }
+  .header__logo, .header-nav { margin: 0; }
+  .header-buttons { gap: 6px; flex-wrap: wrap; }
+  .rooms-page, .profile-page, .room-info, .booking-card__wrapper { flex-direction: column; gap: 24px; }
+  .rooms-page__filters, .room-info__column, .room-info__form, .booking-content, .booking-card__btns { width: 100%; padding-right: 0; }
+  .rooms-page__filters .filters__wrapper { width: 100%; padding-right: 0; }
+  .profile-sidebar { margin-right: 0; }
+  .room-info { margin: 30px 0; }
+  .room-info__form { order: -1; }
+  .room-info__group { flex-wrap: wrap; }
+  .room-info__card { width: 100%; margin-right: 0; }
+  .footer { padding: 24px 0; }
+  .footer-wrapper, .footer-bottom { flex-wrap: wrap; gap: 24px; }
+  .footer-item, .footer-item--logo { max-width: 100%; }
+}
+@media (max-width: 500px) {
+  .language-switch { margin: 0 0 0 auto; }
+  .header__inner { gap: 10px; }
+  .header__logo { margin-right: 0; }
+  .header-buttons { width: 100%; justify-content: flex-start; }
+  .header-nav { order: 3; width: 100%; }
+  .header-buttons .MuiButton-root { padding: 6px 10px; font-size: 11px; }
+  .header-buttons { margin-left: 0; }
+  .form-card.MuiPaper-root { padding: 20px 16px; max-width: 100%; }
+  .searchRooms-form { width: 100% !important; }
+  .room-page__gallery { height: 260px; }
+  .rooms__list { grid-template-columns: minmax(0,1fr); }
+  .rooms-page__sorting > * { max-width: 100%; }
+  .booking-card { padding: 16px 10px; }
+  .booking-content h2 { overflow-wrap: anywhere; }
+}
 
 #root {
   display: flex;

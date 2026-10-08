@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ReactComponent as LogoSite } from '../../../assets/svg/logo.svg';
+import LogoSite from '../../../assets/svg/logo.svg?react';
 
 type LogoProps = {
   className?: string;

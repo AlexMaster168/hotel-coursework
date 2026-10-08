@@ -1,0 +1,11 @@
+**/node_modules
+**/.env
+.env
+.git
+.cache
+client/dist
+server/client
+docs
+test-results
+playwright-report
+.idea

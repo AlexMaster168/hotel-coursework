@@ -11,14 +11,14 @@ function isTokenInvalid(data, dbToken) {
 }
 
 router.post('/signUp', [
-  check('email', 'Некорректный email').isEmail(),
+  check('email', 'Некорректный email').normalizeEmail().isEmail(),
   check('password', 'Минимальная длина пароля 8 символов').isLength({ min: 8 }),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
-          errors: {
+          error: {
             message: 'INVALID DATA',
             code: 400,
           },
@@ -40,7 +40,12 @@ router.post('/signUp', [
       const hashedPassword = await bcrypt.hash(password, 12);
       const newUser = await User.create({
         ...generateUserData(),
-        ...req.body,
+        firstName: String(req.body.firstName || '').slice(0,100),
+        secondName: String(req.body.secondName || '').slice(0,100),
+        email,
+        gender: req.body.gender === 'female' ? 'female' : 'male',
+        birthYear: req.body.birthYear,
+        subscribe: !!req.body.subscribe,
         role: 'user',
         password: hashedPassword,
       });

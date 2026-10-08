@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit';
 import { AppThunk, RootState } from './createStore';
 import { ReviewType } from './../types/types';
 import { createAction, createSlice } from '@reduxjs/toolkit';
@@ -104,13 +105,7 @@ export const getReviewsByIds = (reviewsIds: string[]) => (state: RootState) => {
   }
 };
 
-export const getReviewsByRoomId = (roomId: string) => (state: RootState) => {
-  if (state.reviews.entities) {
-    return state.reviews.entities.filter((review: ReviewType) => review.roomId === roomId);
-  } else {
-    return [];
-  }
-};
+export const getReviewsByRoomId = (roomId: string) => createSelector([(state:RootState)=>state.reviews.entities], entities=>entities.filter(item=>item.roomId===roomId));
 
 export const getReviews = () => (state: RootState) => state.reviews.entities;
 export const getReviewsLoadingStatus = () => (state: RootState) => state.reviews.isLoading;

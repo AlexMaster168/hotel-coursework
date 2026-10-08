@@ -1,3 +1,4 @@
+import { t, useLocale, reviewCount, formatMoney } from "../../../../i18n/locale";
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import ComputerIcon from '@mui/icons-material/Computer';
 import WifiIcon from '@mui/icons-material/Wifi';
@@ -11,44 +12,42 @@ import Divider from '../../../common/Divider';
 import ImageSlider from '../../../common/ImageSlider';
 import Rating from '../../../common/Rating';
 import { RoomType } from '../../../../types/types';
-
-const comfortIconsMap: { [x: string]: JSX.Element } = {
+const comfortIconsMap: {
+  [x: string]: React.ReactNode;
+} = {
   hasWifi: <WifiIcon />,
   hasConditioner: <AcUnitIcon />,
-  hasWorkSpace: <ComputerIcon />,
+  hasWorkSpace: <ComputerIcon />
 };
-
-const RoomCard: React.FC<RoomType> = ({ _id, roomNumber, price, type, images, comforts }) => {
+const RoomCard: React.FC<RoomType> = ({
+  _id,
+  roomNumber,
+  price,
+  type,
+  images,
+  comforts
+}) => {
+  useLocale();
   const reviews = useSelector(getReviewsByRoomId(_id));
   const countReviews = reviews ? reviews.length : 0;
   const rating = countReviews > 0 ? reviews.reduce((acc, cur) => acc + cur.rating, 0) : 0;
-
-  return (
-    <div className='room-card'>
-      {comforts && (
-        <Badge className='badge'>
-          {comforts.map(comfort => (
-            <div key={comfort}>{comfortIconsMap[comfort]}</div>
-          ))}
-        </Badge>
-      )}
+  return <div className='room-card'>
+      {comforts && <Badge className='badge'>
+          {comforts.map(comfort => <div key={comfort}>{comfortIconsMap[comfort]}</div>)}
+        </Badge>}
       <ImageSlider className='room-card__gallery'>
-        {images &&
-          images.map(img => (
-            <div className='room-card__gallery-item' key={img}>
+        {images && images.map(img => <div className='room-card__gallery-item' key={img}>
               <img className='room-card__gallery-item--img' src={img} alt='roomsPhoto' />
-            </div>
-          ))}
+            </div>)}
       </ImageSlider>
       <Link to={`/rooms/${_id}`} className='room-card__description'>
         <div className='room-card__description-row'>
           <h3 className='room-card__title'>
             № <span className='room-card__title--big'>{roomNumber}</span>
-            {type === 'Люкс' && <span className='room-card__type'>{type}</span>}
+            {type === 'Люкс' && <span className='room-card__type'>{t(type)}</span>}
           </h3>
           <div className='room-card__rentPerDay'>
-            <span>{price}₴</span> за добу
-          </div>
+            <span>{formatMoney(price)}</span>{t("за добу")}</div>
         </div>
         <Divider />
         <div className='room-card__description-row'>
@@ -56,16 +55,10 @@ const RoomCard: React.FC<RoomType> = ({ _id, roomNumber, price, type, images, co
             <Rating name='read-only' value={rating} totalCount={countReviews} readOnly />
           </div>
           <div className='room-card__reviews'>
-            <span className='room-card__reviews-count'>{`${countReviews} ${declOfNum(countReviews, [
-              'Відгук',
-              'Відкликання',
-              'Відгуків',
-            ])}`}</span>
+            <span className='room-card__reviews-count'>{reviewCount(countReviews)}</span>
           </div>
         </div>
       </Link>
-    </div>
-  );
+    </div>;
 };
-
 export default RoomCard;

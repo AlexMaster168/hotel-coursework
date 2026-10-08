@@ -7,7 +7,7 @@ type RatingProps = MuiRatingProps & {
 
 const Rating: React.FC<RatingProps> = ({ onChange, name, value, totalCount = 1, precision, ...rest }) => {
   const getRating = useCallback(
-    value => (precision ? +(value / totalCount).toFixed(2) : +Math.ceil(value / totalCount).toFixed()),
+    (value: number | null | undefined) => !value || !totalCount ? 0 : (precision ? +(value / totalCount).toFixed(2) : +Math.ceil(value / totalCount).toFixed()),
     [totalCount, precision]
   );
 

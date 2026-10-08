@@ -72,6 +72,8 @@ const usersSlice = createSlice({
     userLoggedOut: state => {
       state.isLoggedIn = false;
       state.auth.userId = null;
+      state.entities = [];
+      state.error = null;
     },
   },
 });
@@ -116,7 +118,7 @@ export const signIn =
       dispatch(authRequestSuccess({ userId: data.userId }));
       history.push(redirect || '/');
     } catch (error) {
-      const { code, message } = error.response.data.error;
+      const { code, message } = error.response?.data?.error || {code:0,message:error.message};
       if (code === 400) {
         const errorMessage = generateAuthError(message);
         dispatch(authRequestFailed(errorMessage));

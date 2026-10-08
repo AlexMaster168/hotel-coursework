@@ -1,3 +1,4 @@
+import { t, useLocale } from '../../../../i18n/locale';
 import { TableCell, TableHead, TableRow, TableSortLabel, TableHeadProps as MuiTableHeaderProps } from '@mui/material';
 import React from 'react';
 
@@ -18,6 +19,7 @@ type TableHeaderProps<T> = MuiTableHeaderProps & {
 };
 
 function TableHeader<T>({ headCells, sortBy, onRequestSort }: TableHeaderProps<T>) {
+  useLocale();
   const createSortHandler = (property: keyof T) => (event: React.MouseEvent<unknown>) => {
     if (onRequestSort) {
       onRequestSort(event, property);
@@ -40,15 +42,15 @@ function TableHeader<T>({ headCells, sortBy, onRequestSort }: TableHeaderProps<T
                 direction={sortBy.path === headCell.id ? sortBy.order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
               >
-                {headCell.label}
+                {t(headCell.label)}
                 {sortBy.path === headCell.id ? (
                   <span className='visually-hidden'>
-                    {sortBy.order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                    {t(sortBy.order === 'desc' ? 'sorted descending' : 'sorted ascending')}
                   </span>
                 ) : null}
               </TableSortLabel>
             )}
-            {!sortBy && headCell.label}
+            {!sortBy && t(headCell.label)}
           </TableCell>
         ))}
         <TableCell />

@@ -1,2 +1,3 @@
 @echo off
-yarn run start
+cd /d "%~dp0.."
+npm run dev -w server

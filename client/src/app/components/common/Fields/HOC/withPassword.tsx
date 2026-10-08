@@ -1,5 +1,7 @@
 import { IconButton, InputAdornment } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { t, useLocale } from '../../../../i18n/locale';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import React, { useState } from 'react';
 import { TextFieldProps as MuiTextFieldProps } from '@mui/material';
 
@@ -8,6 +10,7 @@ type InjectedProps = {};
 const withPassword =
   <P extends InjectedProps>(Component: React.ComponentType<P>) =>
   (props: MuiTextFieldProps) => {
+    useLocale();
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleShowPassword = () => {
@@ -22,11 +25,11 @@ const withPassword =
       <Component
         {...(props as P)}
         type={showPassword ? 'text' : 'password'}
-        InputProps={{
+        slotProps={{ input: {
           endAdornment: (
             <InputAdornment position='end'>
               <IconButton
-                aria-label='toggle password visibility'
+                aria-label={t(showPassword ? 'Приховати пароль' : 'Показати пароль')}
                 onClick={toggleShowPassword}
                 onMouseDown={handleMouseDownPassword}
                 edge='end'
@@ -35,7 +38,7 @@ const withPassword =
               </IconButton>
             </InputAdornment>
           ),
-        }}
+        } }}
       />
     );
   };

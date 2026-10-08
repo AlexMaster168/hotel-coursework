@@ -1,36 +1,17 @@
 const express = require('express');
 const User = require('../models/User');
 const auth = require('../middleware/auth.middleware');
-const router = express.Router({ mergeParams: true });
-
-router.get('/', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).send(users);
-  } catch (error) {
-    res.status(500).json({
-      message: 'На сервере произошла ошибка. Попробуйте позже',
-    });
-  }
+const router = express.Router();
+router.get('/', (req, res, next) => req.headers.authorization ? auth(req, res, next) : next(), async (req, res) => {
+  const publicFields = ['_id', 'firstName', 'secondName', 'avatarPhoto'];
+  if (!req.user) return res.json(await User.find().select(publicFields.join(' ')));
+  const users = await User.find().select('-password');
+  res.json(users.map(user => String(user._id) === req.user._id || req.userRole === 'admin' ? user : Object.fromEntries(publicFields.map(key => [key, user[key]]))));
 });
-
 router.patch('/:userId', auth, async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    if (userId === req.user._id) {
-      const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
-      res.send(updatedUser);
-    } else {
-      res.status(401).json({
-        message: 'Unauthorized',
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      message: 'На сервере произошла ошибка. Попробуйте позже',
-    });
-  }
+  if (req.params.userId !== req.user._id) return res.sendStatus(403);
+  const fields = ['firstName', 'secondName', 'subscribe', 'birthYear', 'avatarPhoto', 'gender'];
+  const updates = Object.fromEntries(fields.filter(key => Object.hasOwn(req.body, key)).map(key => [key, req.body[key]]));
+  res.json(await User.findByIdAndUpdate(req.user._id, updates, { returnDocument: 'after', runValidators: true }).select('-password'));
 });
-
 module.exports = router;

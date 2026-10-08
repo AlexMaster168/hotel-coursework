@@ -1,46 +1,6 @@
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import DatePicker, { DatePickerProps } from '@mui/lab/DatePicker';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { TextField } from '@mui/material';
-import ukLocale from 'date-fns/locale/uk';
+import { getLanguage, t, useLocale } from '../../../../i18n/locale';
 import React from 'react';
-
-type DatePickerFieldProps = DatePickerProps & {
-  label: string;
-  value: Date | number;
-  minDate: Date | number;
-  name: string;
-  error?: string;
-};
-
-const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, minDate, onChange, error, ...rest }) => {
-  const convertToDefEventParam = (name: string, value: Date | number | null) => ({
-    target: {
-      name,
-      value: value ? new Date(Number(value)).getTime() : null,
-    },
-  });
-
-  return (
-      <LocalizationProvider dateAdapter={AdapterDateFns} locale={ukLocale}>
-        <DatePicker
-            mask="__.__.____"
-            label={label}
-            value={value}
-            minDate={minDate || Date.now()}
-            //@ts-ignore
-            inputProps={{ placeholder: 'ДД.ММ.РРРР' }}
-            onChange={(date: Date | any) => {
-              onChange && onChange(convertToDefEventParam(name, date));
-            }}
-            //@ts-ignore
-            renderInput={(params) => (
-                <TextField {...params} {...(error && { error: true, helperText: error })} />
-            )}
-            {...rest}
-        />
-      </LocalizationProvider>
-  );
-};
-
-export default React.memo(DatePickerField);
+import { TextField } from '@mui/material';
+type Props = { label:string; name:string; value:Date|number; minDate:Date|number; error?:string; onChange?:(event:any)=>void; renderInput?:(params:any)=>React.ReactNode };
+const format=(value:Date|number)=>{const d=new Date(value);return Number.isNaN(+d)?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+export default React.memo(function DatePickerField({label,name,value,minDate,error,onChange}:Props){useLocale();return <TextField fullWidth type='date' label={label} name={name} value={format(value)} error={!!error} helperText={error ? t(error) : undefined} slotProps={{inputLabel:{shrink:true},htmlInput:{lang:getLanguage(),min:format(minDate||Date.now())}}} onChange={e=>onChange?.({target:{name,value:e.target.value?new Date(e.target.value+'T00:00:00').getTime():null}})}/>;});

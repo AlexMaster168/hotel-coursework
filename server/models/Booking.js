@@ -10,6 +10,12 @@ const schema = new Schema({
   userId: { type: SchemaTypes.ObjectId, ref: 'User' },
   totalPrice: Number,
   expires_at: Number,
+  status: { type: String, enum: ['confirmed', 'cancelled'], default: 'confirmed' },
+  paymentStatus: { type: String, enum: ['unpaid', 'paid', 'refunded'], default: 'unpaid' },
+  checkoutSessionId: String,
+  paymentIntentId: String,
+  paidAt: Date,
+  refundedAt: Date,
 });
 
 module.exports = model('Booking', schema);

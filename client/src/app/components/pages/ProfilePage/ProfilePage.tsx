@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { getCurrentUserData } from '../../../store/users';
 import Sidebar from '../../common/Sidebar';
 import ProfileContentProxy from '../../ui/profile/ProfileContentProxy';
@@ -16,7 +16,7 @@ const ProfilePage: React.FC = () => {
           <Sidebar />
         </aside>
       )}
-      <ProfileContentProxy userId={userId} route={route} />
+      <ProfileContentProxy userId={userId || ''} route={route || ''} />
     </div>
   );
 };

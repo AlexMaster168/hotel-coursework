@@ -1,16 +1,16 @@
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { useCallback, useMemo } from 'react';
 import omit from 'lodash.omit';
 import history from '../utils/history';
 
 const useFiltersQuery = () => {
-  const { search } = useLocation<string>();
+  const { search } = useLocation();
 
   const searchFilters = useMemo(() => qs.parse(search, { parseNumbers: true, parseBooleans: true }), [search]);
 
   const setSearchQuery = useCallback(
-    filter => {
+    (filter: Record<string, any>) => {
       const search = qs.stringify(filter);
       history.replace({ search });
     },
@@ -18,7 +18,7 @@ const useFiltersQuery = () => {
   );
 
   const clearFilter = useCallback(
-    ({ target }) => {
+    ({ target }: {target:{name:string;value?:any}}) => {
       const { name } = target;
       const newFilter = omit(searchFilters, name);
 
@@ -28,7 +28,7 @@ const useFiltersQuery = () => {
   );
 
   const handleChangeFilter = useCallback(
-    ({ target }) => {
+    ({ target }: {target:{name:string;value?:any}}) => {
       const { name, value } = target;
       if (value === false || value === 0) {
         const newFilter = { ...searchFilters, [name]: value };

@@ -1,3 +1,4 @@
+import { useAppDispatch } from '../../../../store/createStore';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createLike, getLikesByReviewId, removeLike } from '../../../../store/likes';
@@ -10,7 +11,7 @@ type ReviewLikesProps = {
 
 const ReviewLikes: React.FC<ReviewLikesProps> = ({ reviewId }) => {
   const [status, setStatus] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentUserId = useSelector(getCurrentUserId());
   const likes = useSelector(getLikesByReviewId(reviewId));
 

@@ -1,55 +1,12 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Token = require('../models/Token');
-const config = require('config');
-
+const settings = require('../settings');
 class TokenService {
-  generate(payload) {
-    const accessToken = jwt.sign(payload, config.get('ACCESS_SECRET'), {
-      expiresIn: '1h',
-    });
-
-    const refreshToken = jwt.sign(payload, config.get('REFRESH_SECRET'));
-
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn: 3600,
-    };
-  }
-
-  async save(userId, refreshToken) {
-    const data = await Token.findOne({ user: userId });
-    if (data) {
-      data.refreshToken = refreshToken;
-      return data.save();
-    }
-    const token = await Token.create({ user: userId, refreshToken });
-    return token;
-  }
-
-  validateRefresh(refreshToken) {
-    try {
-      return jwt.verify(refreshToken, config.get('REFRESH_SECRET'));
-    } catch (error) {
-      return null;
-    }
-  }
-
-  validateAccess(accessToken) {
-    try {
-      return jwt.verify(accessToken, config.get('ACCESS_SECRET'));
-    } catch (error) {
-      return null;
-    }
-  }
-
-  async findToken(refreshToken) {
-    try {
-      return await Token.findOne({ refreshToken });
-    } catch (error) {
-      return null;
-    }
-  }
+ generate(payload){return {accessToken:jwt.sign(payload,settings.accessSecret,{expiresIn:'1h',algorithm:'HS256'}),refreshToken:jwt.sign(payload,settings.refreshSecret,{expiresIn:'7d',jwtid:crypto.randomUUID(),algorithm:'HS256'}),expiresIn:3600};}
+ async save(userId,refreshToken){return Token.findOneAndUpdate({user:userId},{refreshToken},{upsert:true,returnDocument:'after'});}
+ validateRefresh(token){try{return jwt.verify(token,settings.refreshSecret,{algorithms:['HS256']});}catch{return null;}}
+ validateAccess(token){try{return jwt.verify(token,settings.accessSecret,{algorithms:['HS256']});}catch{return null;}}
+ async findToken(refreshToken){return Token.findOne({refreshToken});}
 }
-
-module.exports = new TokenService();
+module.exports=new TokenService();

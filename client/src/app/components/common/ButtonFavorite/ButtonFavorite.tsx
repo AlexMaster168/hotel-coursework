@@ -1,22 +1,22 @@
+import { t, useLocale } from "../../../i18n/locale";
 import { IconButton, IconButtonProps } from '@mui/material';
 import React from 'react';
 import Tooltip from '../Tooltip';
 import StarIcon from '@mui/icons-material/Star';
-import StarOutlineIcon from '@mui/icons-material/StarOutline';
-
+import StarOutlineIcon from '@mui/icons-material/StarOutlineRounded';
 type ButtonFavoriteProps = IconButtonProps & {
   status: boolean;
   onToggle: () => void;
 };
-
-const ButtonFavorite: React.FC<ButtonFavoriteProps> = ({ status, onToggle }) => {
-  return (
-    <Tooltip title={status ? 'Видалити з вибраного' : 'Додати до обраного'}>
+const ButtonFavorite: React.FC<ButtonFavoriteProps> = ({
+  status,
+  onToggle
+}) => {
+  useLocale();
+  return <Tooltip title={status ? t("Видалити з вибраного") : t("Додати до обраного")}>
       <IconButton className='room-page__favoriteBtn' size='large' onClick={onToggle}>
         {status ? <StarIcon /> : <StarOutlineIcon />}
       </IconButton>
-    </Tooltip>
-  );
+    </Tooltip>;
 };
-
 export default ButtonFavorite;

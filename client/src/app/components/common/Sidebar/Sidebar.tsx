@@ -1,3 +1,4 @@
+import { t, useLocale } from "../../../i18n/locale";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -9,46 +10,23 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import { getCurrentUserData } from '../../../store/users';
-
 const Sidebar = () => {
+  useLocale();
   const currentUser = useSelector(getCurrentUserData());
-
-  return (
-    <MenuList className='sidebar'>
-      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}`} exact>
-        <AccountCircleIcon />
-        Мій профіль
-      </MenuItem>
-      {currentUser?.role === 'admin' && (
-        <MenuItem
-          component={NavLink}
-          className='sidebar-menu__item'
-          to={`/profile/${currentUser?._id}/dashboard`}
-          exact
-        >
-          <AdminPanelSettingsIcon />
-            Панель адміністратора
-        </MenuItem>
-      )}
-      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/booking`} exact>
-        <StarBorderIcon />
-          Мої Бронювання
-      </MenuItem>
-      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/likes`} exact>
-        <FavoriteBorderIcon />
-          Сподобалось
-      </MenuItem>
-      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/favorites`} exact>
-        <BookmarkBorderIcon />
-          Вибране
-      </MenuItem>
+  return <MenuList className='sidebar'>
+      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}`} end>
+        <AccountCircleIcon />{t("Мій профіль")}</MenuItem>
+      {currentUser?.role === 'admin' && <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/dashboard`} end>
+          <AdminPanelSettingsIcon />{t("Панель адміністратора")}</MenuItem>}
+      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/booking`} end>
+        <StarBorderIcon />{t("Мої Бронювання")}</MenuItem>
+      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/likes`} end>
+        <FavoriteBorderIcon />{t("Сподобалось")}</MenuItem>
+      <MenuItem component={NavLink} className='sidebar-menu__item' to={`/profile/${currentUser?._id}/favorites`} end>
+        <BookmarkBorderIcon />{t("Вибране")}</MenuItem>
 
       <MenuItem className='sidebar-menu__item' component={NavLink} to={`/profile/${currentUser?._id}/edit`}>
-        <SettingsIcon />
-          Редагувати профіль
-      </MenuItem>
-    </MenuList>
-  );
+        <SettingsIcon />{t("Редагувати профіль")}</MenuItem>
+    </MenuList>;
 };
-
 export default Sidebar;

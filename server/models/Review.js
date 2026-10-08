@@ -6,7 +6,7 @@ const schema = new Schema(
       type: String,
       required: true,
     },
-    rating: Number,
+    rating: { type: Number, min: 1, max: 5, required: true },
     roomId: {
       type: Schema.Types.ObjectId,
       ref: 'Room',

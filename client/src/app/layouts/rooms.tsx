@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import Container from '../components/common/Container';
 import Footer from '../components/common/Footer';

@@ -1,3 +1,4 @@
+import { t, useLocale } from "../../../../i18n/locale";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { DialogContent, DialogActions } from '@mui/material';
 import React from 'react';
@@ -8,55 +9,51 @@ import Modal from '../../../common/Modal';
 import { getCurrentUserId } from '../../../../store/users';
 import history from '../../../../utils/history';
 import { BookingType } from '../../../../types/types';
-
 type SuccessBookingModalProps = {
   open: boolean;
   onClose: () => void;
   isLoading: boolean;
   bookingData: BookingType;
 };
-
-const SuccessBookingModal: React.FC<SuccessBookingModalProps> = ({ open, onClose, isLoading, bookingData }) => {
+const SuccessBookingModal: React.FC<SuccessBookingModalProps> = ({
+  open,
+  onClose,
+  isLoading,
+  bookingData
+}) => {
+  useLocale();
   const currentUserId = useSelector(getCurrentUserId());
   const dateArrival = getDateDDMMYYYY(bookingData.arrivalDate);
   const dateDeparture = getDateDDMMYYYY(bookingData.departureDate);
-
   const handleGoBack = () => {
     history.goBack();
   };
-
   const handleGoMyBooking = () => {
     history.push(`/profile/${currentUserId}/booking`);
   };
-
-  return (
-    <Modal title='Бронювання номера' open={open} onClose={onClose} isLoading={isLoading}>
+  return <Modal title={t("Бронювання номера")} open={open} onClose={onClose} isLoading={isLoading}>
       <DialogContent>
         <div className='booking-modal__text'>
-          <h2>Номер успішно заброньований</h2>
+          <h2>{t("Номер успішно заброньований")}</h2>
           <CheckCircleIcon className='booking-modal__text-icon' />
         </div>
         <table className='booking-modal__info'>
           <tbody>
             <tr>
-              <td className='booking-modal__info-dateText'>Дата прибуття:</td>
+              <td className='booking-modal__info-dateText'>{t("Дата прибуття:")}</td>
               <td className='booking-modal__info-date'>{dateArrival}</td>
             </tr>
             <tr>
-              <td className='booking-modal__info-dateText'>Дата виїзду:</td>
+              <td className='booking-modal__info-dateText'>{t("Дата виїзду:")}</td>
               <td className='booking-modal__info-date'>{dateDeparture}</td>
             </tr>
           </tbody>
         </table>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleGoBack}>Назад</Button>
-        <Button onClick={handleGoMyBooking} variant='outlined'>
-          Мої бронювання
-        </Button>
+        <Button onClick={handleGoBack}>{t("Назад")}</Button>
+        <Button onClick={handleGoMyBooking} variant='outlined'>{t("Мої бронювання")}</Button>
       </DialogActions>
-    </Modal>
-  );
+    </Modal>;
 };
-
 export default React.memo(SuccessBookingModal);

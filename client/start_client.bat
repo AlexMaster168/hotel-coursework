@@ -1,2 +1,3 @@
 @echo off
-npm run start
+cd /d "%~dp0.."
+npm run dev -w client

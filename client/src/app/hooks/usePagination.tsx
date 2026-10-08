@@ -10,12 +10,12 @@ function usePagination<T>(items: Array<T>, defaultPageSize?: number, defaultCurr
     }
   }, [items, pageSize]);
 
-  const handleChangePage = useCallback((event, value) => {
+  const handleChangePage = useCallback((event: unknown, value: number) => {
     setCurrentPage(value);
   }, []);
 
-  const handleChangePageSize = useCallback(event => {
-    setPageSize(parseInt(event.target.value, 10));
+  const handleChangePageSize = useCallback((event: {target:{value:string | number}}) => {
+    setPageSize(parseInt(String(event.target.value), 10));
     setCurrentPage(1);
   }, []);
 

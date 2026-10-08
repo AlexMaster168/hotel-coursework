@@ -1,49 +1,18 @@
-const express = require('express');
+const settings = require('./settings');
 const mongoose = require('mongoose');
-const config = require('config');
-const path = require('path');
-const cors = require('cors');
-const chalk = require('chalk');
-const dotenv = require('dotenv');
-const initDatabase = require('./start/initDatabase');
-const routes = require('./routes');
-
-const app = express();
-dotenv.config();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cors());
-app.use('/api', routes);
-
-const PORT = process.env.PORT || config.get('port') || 8080;
-app.use('/images', express.static(path.join(__dirname, 'images')));
-if (process.env.NODE_ENV === 'production') {
-  console.log('production');
-  app.use('/', express.static(path.join(__dirname, 'client')));
-  app.use('/images', express.static(path.join(__dirname, 'images')));
-
-  const indexPath = path.join(__dirname, 'client', 'index.html');
-
-  app.get('*', (req, res) => {
-    res.sendFile(indexPath);
-  });
-}
-
+const app = require('./httpApp');
 async function start() {
-  try {
-    mongoose.connection.once('open', () => {
-      initDatabase();
-    });
-    await mongoose.connect(
-      'mongodb+srv://asilvejstruk:uf1xtx35uq5t7m8h@cluster0.je1pp.mongodb.net/hotel'
-    );
-    console.log(chalk.green('MongoDB connected.'));
-    app.listen(PORT, () => console.log(chalk.green(`Server has been started on port ${PORT}...`)));
-  } catch (error) {
-    console.log(chalk.red(error.message));
-    process.exit(1);
+  let demo;
+  if (process.env.DEMO_MODE === 'true') {
+    if (settings.production) throw new Error('DEMO_MODE is disabled in production');
+    const { MongoMemoryReplSet } = require('mongodb-memory-server');
+    demo = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
   }
+  await mongoose.connect(demo ? demo.getUri('hotel') : settings.mongoUri);
+  await Promise.all([require('./models/ReservationNight').init(), require('./models/User').init()]);
+  if (demo) await require('./start/initDatabase')({ demo: true });
+  const server = app.listen(settings.port, () => console.log(`Hotel API: http://localhost:${settings.port}`));
+  const stop = () => server.close(async () => { await mongoose.disconnect(); if (demo) await demo.stop(); process.exit(0); });
+  process.on('SIGINT', stop); process.on('SIGTERM', stop);
 }
-
-start();
+start().catch(error => { console.error(error.message); process.exit(1); });

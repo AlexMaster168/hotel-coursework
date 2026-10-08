@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect } from 'react';
+import { t, useLocale } from "../../../i18n/locale";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useMediaQuery } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useFiltersQuery, usePagination, useSort } from '../../../hooks';
 import useSearch from '../../../hooks/useSearch';
@@ -12,61 +14,88 @@ import RoomsFilter from '../../ui/rooms/RoomsFilters';
 import RoomsList from '../../ui/rooms/RoomsList';
 import RoomsListSkeleton from '../../ui/rooms/RoomsList/RoomsListSkeleton';
 import RoomsSort from '../../ui/rooms/RoomsSort';
-
-const setPageSizeOptions = [
-  { name: '6', value: 6 },
-  { name: '12', value: 12 },
-  { name: '18', value: 18 },
-  { name: '24', value: 24 },
-];
-
+const setPageSizeOptions = [{
+  name: '6',
+  value: 6
+}, {
+  name: '12',
+  value: 12
+}, {
+  name: '18',
+  value: 18
+}, {
+  name: '24',
+  value: 24
+}];
 const RoomsPage = () => {
+  useLocale();
+  const mobile = useMediaQuery('(max-width:900px)');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const rooms = useSelector(getFilteredRooms());
   const dispatch = useAppDispatch();
   const roomsIsLoading = useSelector(getRoomsLoadingStatus());
-  const { searchFilters, handleResetSearchFilters } = useFiltersQuery();
-  const { filteredData, searchTerm, setSearchTerm, handleChangeSearch } = useSearch(rooms, {
-    searchBy: 'roomNumber',
+  const {
+    searchFilters,
+    handleResetSearchFilters
+  } = useFiltersQuery();
+  const {
+    filteredData,
+    searchTerm,
+    setSearchTerm,
+    handleChangeSearch
+  } = useSearch(rooms, {
+    searchBy: 'roomNumber'
   });
-  const { sortedItems, sortBy, setSortBy } = useSort(filteredData || [], { path: 'roomNumber', order: 'desc' });
+  const {
+    sortedItems,
+    sortBy,
+    setSortBy
+  } = useSort(filteredData || [], {
+    path: 'roomNumber',
+    order: 'desc'
+  });
   const {
     itemsListCrop: roomsListCrop,
     currentPage,
     pageSize,
     handleChangePage,
-    handleChangePageSize,
+    handleChangePageSize
   } = usePagination(sortedItems || [], setPageSizeOptions[1].value);
-
-  const handleSort = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSortBy(JSON.parse(event.target.value));
-      handleChangePage(event, 1);
-    },
-    [handleChangePage, setSortBy]
-  );
-
+  const handleSort = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSortBy(JSON.parse(event.target.value));
+    handleChangePage(event, 1);
+  }, [handleChangePage, setSortBy]);
   const handleResetFilters = useCallback(() => {
     handleResetSearchFilters();
     setSearchTerm('');
-    setSortBy({ path: 'roomNumber', order: 'desc' });
-    handleChangePageSize({ target: setPageSizeOptions[1] });
+    setSortBy({
+      path: 'roomNumber',
+      order: 'desc'
+    });
+    handleChangePageSize({
+      target: setPageSizeOptions[1]
+    });
   }, [handleChangePageSize, handleResetSearchFilters]);
-
   useEffect(() => {
-    const oneDayMs = 86_000_000;
+    const oneDayMs = 86_400_000;
     const initialSearchFilters = {
       arrivalDate: Date.now(),
-      departureDate: Date.now() + oneDayMs,
+      departureDate: Date.now() + oneDayMs
     };
-
     setSessionStorageData(searchFilters);
-    dispatch(loadFilteredRoomsList({ ...initialSearchFilters, ...searchFilters }));
+    dispatch(loadFilteredRoomsList({
+      ...initialSearchFilters,
+      ...searchFilters
+    }));
   }, [searchFilters]);
-
-  return (
-    <main className='rooms-page'>
+  return <main className='rooms-page'>
       <aside className='rooms-page__filters'>
+        <details className='filters-panel' open={!mobile || filtersOpen} onToggle={e => {
+        if (mobile) setFiltersOpen(e.currentTarget.open);
+      }}>
+          <summary>{t("Дати, гості та фільтри")}</summary>
         <RoomsFilter onReset={handleResetFilters} />
+        </details>
       </aside>
       <section className='rooms-page__rooms'>
         <div className='rooms-page__sorting'>
@@ -74,23 +103,21 @@ const RoomsPage = () => {
           <RoomsSort sortBy={sortBy} onSort={handleSort} />
           <RoomsDisplayCount count={pageSize} setCount={handleChangePageSize} options={setPageSizeOptions} />
         </div>
-        <h2 className='rooms__title'>Номери, які ми для вас підібрали</h2>
+        <h2 className='rooms__title'>{t("Номери, які ми для вас підібрали")}</h2>
         {roomsIsLoading ? <RoomsListSkeleton pageSize={pageSize} /> : <RoomsList rooms={roomsListCrop} />}
-        {roomsListCrop.length === 0 && <h2>Ми не знайшли для вас відповідних номерів за вашими параметрами &#128577;</h2>}
+        {roomsListCrop.length === 0 && <h2>{t("Ми не знайшли для вас відповідних номерів за вашими параметрами 🙁")}</h2>}
 
-        {sortedItems.length > pageSize && (
-          <div className='rooms-page__pagination'>
+        {sortedItems.length > pageSize && <div className='rooms-page__pagination'>
             <Pagination items={sortedItems} pageSize={pageSize} currentPage={currentPage} onChange={handleChangePage} />
             <p className='rooms-page__pagination-info'>
-              {`${(currentPage - 1) * pageSize || 1} - 
-              ${pageSize * currentPage > rooms.length ? rooms.length : pageSize * currentPage}
-              з ${rooms.length} варіантів оренди`}
+              {t("{v0} - {v1} з {v2} варіантів оренди", {
+            v0: (currentPage - 1) * pageSize || 1,
+            v1: pageSize * currentPage > rooms.length ? rooms.length : pageSize * currentPage,
+            v2: rooms.length
+          })}
             </p>
-          </div>
-        )}
+          </div>}
       </section>
-    </main>
-  );
+    </main>;
 };
-
 export default RoomsPage;

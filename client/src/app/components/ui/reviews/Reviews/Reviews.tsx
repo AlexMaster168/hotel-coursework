@@ -1,40 +1,35 @@
+import { t, useLocale, reviewCount } from "../../../../i18n/locale";
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { getReviewsByRoomId } from '../../../../store/reviews';
 import { getCurrentUserId } from '../../../../store/users';
 import declOfNum from '../../../../utils/declOfNum';
 import { ReviewsForm } from '../../forms';
 import ReviewsList from '../ReviewsList';
-
 const Reviews = () => {
-  const { roomId } = useParams<{ roomId: string }>();
+  useLocale();
+  const {
+    roomId = ''
+  } = useParams<{
+    roomId: string;
+  }>();
   const reviews = useSelector(getReviewsByRoomId(roomId));
-
   const currentUserId = useSelector(getCurrentUserId());
-
-  const sortedReviews = reviews.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const sortedReviews = [...reviews].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   const totalReviewsCount = sortedReviews.length;
-
-  return (
-    <>
-      {reviews.length > 0 && (
-        <section className='reviews'>
+  return <>
+      {reviews.length > 0 && <section className='reviews'>
           <div className='reviews-title'>
-            <h2 className='room-info__card-title'>Відгуки відвідувачів номера</h2>
-            <span>{`${totalReviewsCount} ${declOfNum(totalReviewsCount, ['відгук', 'відгуку', 'відгуків'])}`}</span>
+            <h2 className='room-info__card-title'>{t("Відгуки відвідувачів номера")}</h2>
+            <span>{reviewCount(totalReviewsCount)}</span>
           </div>
           {totalReviewsCount > 0 && <ReviewsList reviews={sortedReviews} />}
-        </section>
-      )}
-      {currentUserId && (
-        <section className='reviews-form'>
-          <h2>Залишити відгук</h2>
+        </section>}
+      {currentUserId && <section className='reviews-form'>
+          <h2>{t("Залишити відгук")}</h2>
           <ReviewsForm />
-        </section>
-      )}
-    </>
-  );
+        </section>}
+    </>;
 };
-
 export default Reviews;

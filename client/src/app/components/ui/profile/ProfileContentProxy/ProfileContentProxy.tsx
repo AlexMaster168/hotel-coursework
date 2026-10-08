@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect } from 'react-router';
+import { Navigate } from 'react-router-dom';
 import { getCurrentUserData } from '../../../../store/users';
 import AdminDashboard from '../AdminDashboard';
 import ProfileBooking from '../ProfileBooking';
@@ -16,19 +16,18 @@ type ProfileContentProxyProps = {
 
 const ProfileContentProxy: React.FC<ProfileContentProxyProps> = ({ userId, route }) => {
   const currentUser = useSelector(getCurrentUserData());
-  const contentByType: { [x: string]: JSX.Element } = {
+  const contentByType: { [x: string]: React.ReactNode } = {
     booking: <ProfileBooking />,
     likes: <ProfileLikes />,
     favorites: <ProfileFavorites />,
-    edit: currentUser?._id === userId ? <ProfileEdit /> : <Redirect to={`/profile/${currentUser?._id}`} />,
-    dashboard: currentUser?.role === 'admin' ? <AdminDashboard /> : <Redirect to={`/profile/${currentUser?._id}`} />,
+    edit: currentUser?._id === userId ? <ProfileEdit /> : <Navigate replace to={`/profile/${currentUser?._id}`} />,
+    dashboard: currentUser?.role === 'admin' ? <AdminDashboard /> : <Navigate replace to={`/profile/${currentUser?._id}`} />,
   };
 
-  const CurrentProfileContent = () => contentByType[route] || <UserProfile userId={userId} />;
 
   return (
     <>
-      <CurrentProfileContent />
+      {contentByType[route] || <UserProfile userId={userId} />}
     </>
   );
 };

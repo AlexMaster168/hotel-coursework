@@ -13,7 +13,7 @@ const withSubscribe =
       setData('');
     };
 
-    const handleChange = useCallback(event => {
+    const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
       setData(event.target.value);
     }, []);
 
@@ -26,7 +26,7 @@ const withSubscribe =
         {...(props as P)}
         onChange={handleChange}
         value={data}
-        InputProps={{
+        slotProps={{ input: {
           endAdornment: (
             <InputAdornment position='end'>
               <IconButton
@@ -40,7 +40,7 @@ const withSubscribe =
               </IconButton>
             </InputAdornment>
           ),
-        }}
+        } }}
       />
     );
   };

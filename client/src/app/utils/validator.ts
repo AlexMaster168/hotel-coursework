@@ -1,4 +1,4 @@
-import { isValid } from 'date-fns/esm';
+import { isValid } from 'date-fns';
 
 export type ConfigFieldNameType = {
   message: string;
@@ -49,7 +49,7 @@ export function validator(data: { [key: string]: any }, validatorConfig: Validat
       }
       case 'min': {
         if (config.value) {
-          statusValidate = fieldData.length < config.value;
+          statusValidate = fieldData.length < Number(config.value);
         }
         break;
       }

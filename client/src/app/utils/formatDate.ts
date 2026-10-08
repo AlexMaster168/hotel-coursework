@@ -1,74 +1,13 @@
-import declOfNum from './declOfNum';
-
-const months = [
-  'Січня',
-  'Лютого',
-  'Березня',
-  'Квітня',
-  'Травня',
-  'Червеня',
-  'Липня',
-  'Серпня',
-  'Вересня',
-  'Жовтня',
-  'Листопада',
-  'Грудня',
-];
-
-export function decomposeDate(date: number | Date | string) {
-  date = new Date(date).getTime();
-  if (typeof date === 'string') {
-    date = Number(date);
-  }
-  const year = new Date(date).getFullYear();
-  const month = new Date(date).getMonth();
-  const day = new Date(date).getDate();
-  const hours = new Date(date).getHours();
-  const min = new Date(date).getMinutes();
-
-  return { date, year, month, day, hours, min };
-}
-
-export function getDateDDMMYYYY(date: number | Date | string) {
-  const { day, month, year } = decomposeDate(date);
-  return `${day} ${months[month]} ${year}`;
-}
-
-export default function formatDate(value: number | Date | string) {
-  value = new Date(value).getTime();
-  const { year, month, day, hours, min } = decomposeDate(value);
-
-  const currentDateTime = Date.now();
-  const postCreatedTime = Number(value);
-  const diffTime = Math.abs(currentDateTime - postCreatedTime);
-
-  const checkLeapYear = (year: number) => {
-    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-  };
-
-  const getValidTime = (hours: number | string, min: number | string) => {
-    hours = hours < 10 ? `0${hours}` : hours;
-    min = min < 10 ? `0${min}` : min;
-    return `${hours}:${min}`;
-  };
-
-  const oneMinutesAgo = 60000;
-  const thirtyMinutesAgo = oneMinutesAgo * 30;
-  const lessOneDay = oneMinutesAgo * 60 * 24;
-  const lessCurrentYear = lessOneDay * (checkLeapYear(year) ? 366 : 365);
-
-  if (diffTime <= oneMinutesAgo) {
-    return 'щойно';
-  } else if (diffTime <= thirtyMinutesAgo) {
-    const minutes = Math.floor(diffTime / 60000);
-    return `${minutes} ${declOfNum(minutes, [ 'хвилина', 'хвилини', 'хвилин'])} назад`;
-  } else if (diffTime > thirtyMinutesAgo && diffTime <= lessOneDay) {
-    return `сьогодні в ${getValidTime(hours, min)}`;
-  } else if (diffTime > lessOneDay && diffTime <= lessCurrentYear) {
-    return `${day} ${months[month]} в ${getValidTime(hours, min)}`;
-  } else if (diffTime > lessCurrentYear) {
-    return `${day} ${months[month]} ${year} року в ${getValidTime(hours, min)}`;
-  } else {
-    return `Цей коментар залишило НЛО з майбутнього ¯\\_(ツ)_/¯`;
-  }
+import { getLocale, formatDate as formatCalendarDate } from '../i18n/locale';
+export function decomposeDate(value:number|Date|string){const d=new Date(value);return {date:+d,year:d.getFullYear(),month:d.getMonth(),day:d.getDate(),hours:d.getHours(),min:d.getMinutes()};}
+export const getDateDDMMYYYY = formatCalendarDate;
+export default function formatDate(value:number|Date|string){
+ const d=new Date(value);if(!Number.isFinite(+d))return '—';
+ const seconds=Math.round((+d-Date.now())/1000);
+ const relative=new Intl.RelativeTimeFormat(getLocale(),{numeric:'auto'});
+ if(Math.abs(seconds)<60)return relative.format(0,'second');
+ if(Math.abs(seconds)<3600)return relative.format(Math.round(seconds/60),'minute');
+ if(Math.abs(seconds)<86400)return relative.format(Math.round(seconds/3600),'hour');
+ if(Math.abs(seconds)<604800)return relative.format(Math.round(seconds/86400),'day');
+ return formatCalendarDate(value);
 }

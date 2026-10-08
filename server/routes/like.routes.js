@@ -6,7 +6,8 @@ const auth = require('../middleware/auth.middleware');
 router.get('/', async (req, res) => {
   try {
     const { orderBy, equalTo } = req.query;
-    const likes = await Like.find({ [orderBy]: equalTo });
+    const query = ['roomId','userId','reviewId'].includes(orderBy) && typeof equalTo === 'string' ? { [orderBy]: equalTo } : {};
+    const likes = await Like.find(query);
     res.status(200).send(likes);
   } catch (error) {
     res.status(500).json({
@@ -34,8 +35,9 @@ router.delete('/:likeId', auth, async (req, res) => {
     const { likeId } = req.params;
     const removedLike = await Like.findById(likeId);
 
+    if (!removedLike) return res.sendStatus(404);
     if (removedLike.userId.toString() === req.user._id) {
-      await removedLike.remove();
+      await removedLike.deleteOne();
       return res.send(null);
     } else {
       res.status(401).json({

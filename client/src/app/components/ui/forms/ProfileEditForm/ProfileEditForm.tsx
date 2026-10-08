@@ -1,3 +1,5 @@
+import { t, useLocale } from "../../../../i18n/locale";
+import { useAppDispatch } from '../../../../store/createStore';
 import { TextField } from '@mui/material';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,58 +9,48 @@ import { UserType } from '../../../../types/types';
 import Button from '../../../common/Button';
 import { DatePickerField, InputField, RadioGroup } from '../../../common/Fields';
 import validatorConfig from './validatorConfig';
-
-const genderItems = [
-  { id: 'male', title: 'Чоловік' },
-  { id: 'female', title: 'Жінка' },
-];
-
+const genderItems = [{
+  id: 'male',
+  title: 'Чоловік'
+}, {
+  id: 'female',
+  title: 'Жінка'
+}];
 const ProfileEditForm = () => {
+  useLocale();
   const currentUserData = useSelector(getCurrentUserData());
-
   const initialData: UserType = {
     firstName: currentUserData?.firstName || '',
     secondName: currentUserData?.secondName || '',
     gender: currentUserData?.gender || 'male',
     birthYear: currentUserData?.birthYear || Date.now(),
-    role: currentUserData?.role || 'user',
+    role: currentUserData?.role || 'user'
   };
-
-  const { data, errors, handleInputChange, handleKeyDown, validate } = useForm(initialData, true, validatorConfig);
-
-  const dispatch = useDispatch();
-
+  const {
+    data,
+    errors,
+    handleInputChange,
+    handleKeyDown,
+    validate
+  } = useForm(initialData, true, validatorConfig);
+  const dispatch = useAppDispatch();
   const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (validate(data)) {
       dispatch(updateUserData(data));
     }
   };
-
-  return (
-    <>
+  return <>
       <Form data={data} errors={errors} handleChange={handleInputChange} handleKeyDown={handleKeyDown}>
-        <InputField autoFocus name='firstName' label="Ім'я" />
-        <InputField name='secondName' label='Прізвище' />
+        <InputField autoFocus name='firstName' label={t("Ім'я")} />
+        <InputField name='secondName' label={t("Прізвище")} />
         <RadioGroup name='gender' items={genderItems} />
-        <DatePickerField
-          onChange={handleInputChange}
-          value={data.birthYear}
-          openTo='year'
-          mask='__.__.____'
-          label='Дата Народження'
-          name='birthYear'
-          minDate={new Date('1950-01-01')}
-          renderInput={params => (
-            <TextField {...params} {...(errors?.birthYear && { error: true, helperText: errors?.birthYear })} />
-          )}
-        />
-        <Button type='submit' onClick={handleSubmit} fullWidth disabled={Object.keys(errors).length !== 0}>
-          Оновити
-        </Button>
+        <DatePickerField onChange={handleInputChange} value={data.birthYear} label={t("Дата Народження")} name='birthYear' minDate={new Date('1950-01-01')} renderInput={params => <TextField {...params} {...errors?.birthYear && {
+        error: true,
+        helperText: errors?.birthYear
+      }} />} />
+        <Button type='submit' onClick={handleSubmit} fullWidth disabled={Object.keys(errors).length !== 0}>{t("Оновити")}</Button>
       </Form>
-    </>
-  );
+    </>;
 };
-
 export default ProfileEditForm;

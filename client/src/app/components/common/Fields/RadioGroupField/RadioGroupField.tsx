@@ -1,3 +1,4 @@
+import { t, useLocale } from '../../../../i18n/locale';
 import {
   FormControl,
   FormControlLabel,
@@ -14,12 +15,13 @@ type RadioGroupType = MuiRadioGroupProps & {
 };
 
 const RadioGroupField: React.FC<RadioGroupType> = ({ name, label, value, onChange, items }) => {
+  useLocale();
   return (
     <FormControl component='fieldset'>
       <FormLabel component='legend'>{label}</FormLabel>
       <MuiRadioGroup row name={name} value={value} onChange={onChange}>
         {items.map(item => (
-          <FormControlLabel key={item.id} value={item.id} control={<Radio />} label={item.title || ''} />
+          <FormControlLabel key={item.id} value={item.id} control={<Radio />} label={t(item.title || '')} />
         ))}
       </MuiRadioGroup>
     </FormControl>

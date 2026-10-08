@@ -1,14 +1,11 @@
 import { createTheme } from '@mui/material/styles';
-import { ruRU } from '@mui/material/locale';
-const theme = createTheme(
+import { ukUA, enUS } from '@mui/material/locale';
+export const createHotelTheme = language => createTheme(
   {
     typography: {
-      useNextVariants: true,
       fontFamily: "'Montserrat', sans-serif !important",
       fontSize: 14,
     },
   },
-  ruRU
+  language === 'en' ? enUS : ukUA
 );
-
-export default theme;

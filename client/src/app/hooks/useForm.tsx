@@ -7,7 +7,7 @@ function useForm<T>(initialData: T, validateOnChange: boolean, validatorConfig: 
   const [enterError, setEnterError] = useState<string | null>(null);
 
   const validate = useCallback(
-    data => {
+    (data: Record<string, any>) => {
       const errors = validator(data, validatorConfig);
       setErrors(errors);
       return Object.keys(errors).length === 0;
@@ -16,7 +16,7 @@ function useForm<T>(initialData: T, validateOnChange: boolean, validatorConfig: 
   );
 
   const handleInputChange = useCallback(
-    ({ target }) => {
+    ({ target }: {target:{name:string;value:any}}) => {
       const { name, value } = target;
       setData(prevState => ({
         ...prevState,
@@ -29,7 +29,7 @@ function useForm<T>(initialData: T, validateOnChange: boolean, validatorConfig: 
     [validateOnChange, validate]
   );
 
-  const handleKeyDown = useCallback(event => {
+  const handleKeyDown = useCallback((event: any) => {
     if (event.keyCode === 13) {
       event.preventDefault();
       const form = event.target.form;
@@ -37,7 +37,7 @@ function useForm<T>(initialData: T, validateOnChange: boolean, validatorConfig: 
         el => el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'button'
       );
       const indexField = Array.prototype.indexOf.call(formElements, event.target);
-      formElements[indexField + 1].focus();
+      formElements[indexField + 1]?.focus();
     }
   }, []);
 
@@ -91,6 +91,7 @@ type FormItemProps = {
 function Form({ children, handleChange, data, errors, handleKeyDown, ...rest }: FormType) {
   const clonedElements = React.Children.map(children, child => {
     const item = child as ReactElement<PropsWithChildren<FormItemProps>>;
+    if (!React.isValidElement(item) || item.props.type === 'submit' || item.props.type === 'button') return child;
     const childType = typeof item;
     let config: FormItemProps = { name: '' };
     if (
